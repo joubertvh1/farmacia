@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	template="/templates/modeloSistema.xhtml">
+
+	<ui:define name="menu">
+		<ui:include src="/includes/menu.xhtml" />
+	</ui:define>
+
+	<ui:define name="conteudo">
+		<h:form id="frmProdutosMix">
+			<p:dataTable id="tbProdutosMix" widgetVar="tabelaProdutosMix"
+				emptyMessage="Nenhum registro encontrado"
+				value="#{MBProdutoMix.listaProdutoMix}"
+				filteredValue="#{MBProdutoMix.produtoMixFiltro}" var="item"
+				paginator="true" paginatorPosition="bottom" rows="7">
+
+				<f:facet name="header">Lista de Produtos Mix</f:facet>
+
+				<p:column headerText="Código Interno" sortBy="#{item.codigo_pk}"
+					filterBy="#{item.codigo_pk}">
+					<h:outputText value="#{item.codigo_pk}" />
+				</p:column>
+				
+				
+				<p:column headerText="Código" sortBy="#{item.codigo}"
+					filterBy="#{item.codigo}">
+					<h:outputText value="#{item.codigo}" />
+				</p:column>
+
+				<p:column headerText="Descricao" sortBy="#{item.descricao}"
+					filterBy="#{item.descricao}">
+					<h:outputText value="#{item.descricao}" />
+				</p:column>
+
+				<p:column headerText="Quantidade" sortBy="#{item.quantidade}"
+					filterBy="#{item.quantidade}">
+					<h:outputText value="#{item.quantidade}" />
+				</p:column>
+
+				<p:column headerText="Produto Composto"
+					sortBy="#{item.produtos.codigo}"
+					filterBy="#{item.produtos.descricao}">
+					<h:outputText value="#{item.produtos.descricao}" />
+				</p:column>
+
+				<p:column headerText="Opções">
+					<p:commandButton icon="ui-icon-trash"
+						oncomplete="PF('dlgProMixExcluir').show();"
+						update=":frmProMixExcluir:pnProMixExcluir">
+						<f:setPropertyActionListener value="#{item}"
+							target="#{MBProdutoMix.produtoMix}"></f:setPropertyActionListener>
+					</p:commandButton>
+
+					<p:commandButton icon="ui-icon-pencil"
+						actionListener="#{MBProdutoMix.prepararEditar}"
+						oncomplete="PF('dlgProMixEditar').show();"
+						update=":frmProMixEditar:pnProMixEditar">
+						<f:setPropertyActionListener value="#{item}"
+							target="#{MBProdutoMix.produtoMix}"></f:setPropertyActionListener>
+					</p:commandButton>
+				</p:column>
+
+				<f:facet name="footer">
+					<p:commandButton value="Novo"
+						oncomplete="PF('dlgProMixNovo').show();"
+						actionListener="#{MBProdutoMix.prepararNovo}"
+						update=":frmProdutoMixNovo:pnProdutoMixNovo">
+
+					</p:commandButton>
+				</f:facet>
+
+			</p:dataTable>
+		</h:form>
+		<p:dialog widgetVar="dlgProMixNovo" closable="false" draggable="false"
+			resizable="false" header="Cadastrar Produto Mix" modal="true"
+			appendTo="@(body)">
+
+
+			<h:form id="frmProdutoMixNovo">
+				<h:panelGrid id="pnProdutoMixNovo" columns="2">
+					<p:outputLabel value="Código" />
+					<h:inputText size="15" maxlength="50"
+						value="#{MBProdutoMix.produtoMix.codigo}" required="true"
+						requiredMessage="O CAMPO DESCRIÇÃO É OBRIGATORIO" />
+					<p:outputLabel value="Descrição" />
+					<h:inputText size="15" maxlength="50"
+						value="#{MBProdutoMix.produtoMix.descricao}" required="true"
+						requiredMessage="O CAMPO DESCRIÇÃO É OBRIGATORIO" />
+					<p:outputLabel value="Quantidade" />
+					<h:inputText size="15" maxlength="15"
+						value="#{MBProdutoMix.produtoMix.quantidade}" required="true"
+						requiredMessage="O CAMPO QUANTIDADE É OBRIGATORIO" />
+					<p:outputLabel value="Produto Composto" />
+					<p:selectOneMenu value="#{MBProdutoMix.produtoMix.produtos.codigo}"
+						filter="true" required="true"
+						requiredMessage="O CAMPO PRODUTO É OBRIGATORIO">
+						<f:selectItem itemValue="" itemLabel="Selecione um Item" />
+						<f:selectItems value="#{MBProdutoMix.comboProdutos}" var="item"
+							itemValue="#{item.codigo}" itemLabel="#{item.descricao}">
+						</f:selectItems>
+					</p:selectOneMenu>
+
+
+				</h:panelGrid>
+				<h:panelGrid columns="2">
+					<p:commandButton value="Gravar" actionListener="#{MBProdutoMix.novo}"
+						oncomplete="verificar(xhr, status, args, 'dlgProMixEditar', 'tbProdutosMix')"
+						update=":frmProdutosMix:tbProdutosMix :msgGlobal">
+					</p:commandButton>
+					<p:commandButton value="Cancelar" process="@this"
+						onclick="PF('dlgProMixNovo').hide();" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<p:dialog widgetVar="dlgProMixExcluir" closable="false" draggable="false"
+			resizable="false" header="Excluir Produto" modal="true"
+			appendTo="@(body)">
+
+			<h:form id="frmProMixExcluir">
+				<h:panelGrid id="pnProMixExcluir" columns="2">
+					<h:outputText value="Código" />
+					<h:inputText value="#{MBProdutoMix.produtoMix.codigo}" disabled="true" />
+					<h:outputText value="Descrição" />
+					<h:inputText value="#{MBProdutoMix.produtoMix.descricao}"
+						disabled="true" />
+				</h:panelGrid>
+				<h:panelGrid columns="2">
+					<p:commandButton value="Excluir"
+						actionListener="#{MBProdutos.excluir}"
+						oncomplete="PF('dlgProMixExcluir').hide(); tabelaProdutosMix.clearFilters()"
+						update=":frmProdutosMix:tbProdutosMix" />
+					<p:commandButton value="Cancelar" process="@this"
+						onclick="PF('dlgProMixExcluir').hide();" />
+
+				</h:panelGrid>
+			</h:form>
+
+		</p:dialog>
+		<p:dialog widgetVar="dlgProMixEditar" closable="false" draggable="false"
+			resizable="false" header="Editar Produto" modal="true"
+			appendTo="@(body)">
+
+			<h:form id="frmProMixEditar">
+				<h:panelGrid id="pnProMixEditar" columns="5">
+					<h:outputText value="Código" />
+					<h:outputText value="#{MBProdutoMix.produtoMix.codigo}" />
+					<h:outputText value="Descrição" />
+					<h:inputText value="#{MBProdutoMix.produtoMix.descricao}"
+						required="true" requiredMessage="Campo Obrigatorio" />
+					<h:outputText value="" />
+					<h:outputText value="Quantidade" />
+					<h:inputText value="#{MBProdutoMix.produtoMix.quantidade}"
+						required="true" requiredMessage="Campo Obrigatorio" />
+					<h:outputText value="Produto Composto" />
+					<p:selectOneMenu value="#{MBProdutoMix.produtoMix.produtos.codigo}"
+						filter="true" required="true" requiredMessage="Campo Obrigatorio">
+						<f:selectItems value="#{MBProdutoMix.comboProdutos}" var="item"
+							itemValue="#{item.codigo}" itemLabel="#{item.descricao}">
+						</f:selectItems>
+					</p:selectOneMenu>
+				</h:panelGrid>
+				<h:panelGrid columns="5">
+					<p:commandButton value="Editar"
+						actionListener="#{MBProdutoMix.editar}"
+						oncomplete="verificar(xhr, status, args, 'dlgProMixEditar', 'tbProdutosMix')"
+						update=":frmProdutosMix:tbProdutosMix" />
+					<p:commandButton value="Cancelar" process="@this"
+						onclick="PF('dlgProMixEditar').hide();" />
+
+				</h:panelGrid>
+			</h:form>
+
+		</p:dialog>
+
+
+	</ui:define>
+
+</ui:composition>
